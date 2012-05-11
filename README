@@ -1,0 +1,19 @@
+=== pyBioLab ===
+
+By Charles Fracchia <charlesfracchia@gmail.com> © 2012
+
+This package allows you to control and collect data from biological equipment found in laboratories. It contains details and implementations for both the hardware and software parts required to interface with the equipment.
+
+=== Installation ===
+
+= Hardware =
+
+= Software =
+
+=== Dependencies ===
+
+=== Thanks ===
+
+Steve Heisig
+Daniel Levner
+Adam Marblestone
