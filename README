@@ -11,6 +11,7 @@ This package allows you to control and collect data from biological equipment fo
 = Software =
 
 === Dependencies ===
+pyXBee
 
 === Thanks ===
 
