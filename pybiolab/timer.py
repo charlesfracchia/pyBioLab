@@ -8,7 +8,7 @@ Timer class module
 This class defines data and methods common to all timers.
 """
 
-class Electricity(object):
+class Timer(object):
     """docstring for Timers"""
     
     def start(self):
@@ -23,7 +23,7 @@ class Electricity(object):
         """Stops the timer"""
         pass    
     
-    def __init__(self, maxSpeed):
+    def __init__(self, maxTime):
         super(Timer, self).__init__()
         self.maxTime = maxTime
         
