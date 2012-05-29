@@ -23,10 +23,3 @@ class Shaker(object):
         super(Shaker, self).__init__()
         self.maxSpeed = maxSpeed
         
-
-#Testing
-#m = Shaker(300)
-#print m.maxSpeed
-#print m.maxTemp
-        
-        
