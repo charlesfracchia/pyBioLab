@@ -12,6 +12,7 @@ This package allows you to control and collect data from biological equipment fo
 
 === Dependencies ===
 pyXBee
+pySerial
 
 === Thanks ===
 

@@ -1,7 +1,7 @@
 """
 volume.py
 
-by Charles Fracchia, 2012
+by Charles Fracchia, Copyright (c) 2012
 
 Volume class module
 
