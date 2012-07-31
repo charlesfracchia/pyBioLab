@@ -2,9 +2,13 @@ from distutils.core import setup
 import os
 
 def getDeviceDirectories(dir):
+    """Get the subdirectories for each device brand"""
+    pass
     return [name for name in os.listdir(dir) if os.path.isdir(os.path.join(dir, name))]
 
 def autoPopulatePackages():
+    """Add each device brand folder to the list of packages to be built"""
+    pass
     devicesPath = os.getcwd()+'/pybiolab/devices'
     brandDirs = getDeviceDirectories(devicesPath)
     for brand in brandDirs:
@@ -15,7 +19,7 @@ packages=[
     'pybiolab.devices',
 ]
 
-autoPopulatePackages()
+autoPopulatePackages()  #Automatically adds all the device definitions to the list of built packages
 
 requiredPackages=[
     'serial',
