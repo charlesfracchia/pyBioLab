@@ -1,10 +1,21 @@
 from distutils.core import setup
+import os
 
+def getDeviceDirectories(dir):
+    return [name for name in os.listdir(dir) if os.path.isdir(os.path.join(dir, name))]
+
+def autoPopulatePackages():
+    devicesPath = os.getcwd()+'/pybiolab/devices'
+    brandDirs = getDeviceDirectories(devicesPath)
+    for brand in brandDirs:
+        packages.append('pybiolab.devices.' + brand)
+    
 packages=[
     'pybiolab',
     'pybiolab.devices',
-    'pybiolab.devices.newbrunswick',
 ]
+
+autoPopulatePackages()
 
 requiredPackages=[
     'serial',

@@ -8,4 +8,4 @@ python setup.py build
 echo Moving pyBioLab...
 mv -f build/lib/pybiolab examples/pybiolab
 echo Fixing permissions
-chown -Rv username examples/pybiolab
+chown -Rv charlesfracchia examples/pybiolab

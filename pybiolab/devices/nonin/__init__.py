@@ -1,8 +1,8 @@
 """
 pyBioLab devices brand package initialization file
-for brand: New Brunswick Scientific (http://www.nbsc.com/)
+for brand: Nonin Medical ()
 By Charles Fracchia, 2012
 charlesfracchia@gmail.com
 """
 
-from innova import Innova
+from wristox2_3150 import WristOx2

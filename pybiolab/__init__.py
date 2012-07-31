@@ -14,6 +14,7 @@ from pybiolab.shaker import Shaker
 from pybiolab.temperature import Temperature
 from pybiolab.timer import Timer
 from pybiolab.volume import Volume
+from pybiolab.syringe import SyringePump
 
 #Import all the device configuration files
 from pybiolab.devices import *

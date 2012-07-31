@@ -1,6 +1,7 @@
 #python specific
 *.pyc
 /examples/pybiolab
+/build
 
 ## generic files to ignore
 *~

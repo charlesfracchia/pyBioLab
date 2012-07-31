@@ -12,6 +12,7 @@ from xbee import XBee, ZigBee
 import httplib, urllib
 import re
 from timeout import *
+import inspect
 
 allBaud = [300,1200,2400,4800,9600,14400,19200,28800,38400,57600,115200,230400]
 #Types of supported connections
@@ -20,8 +21,7 @@ allSources = ['xbee','zigbee','http']
 class Device(object):
     """docstring for Device"""
     
-    def __init__(self, dId, brand, model, modelNo, source, destination, linkType, baud=9600, synchronous=True):
-        #super(Device, self).__init__()
+    def __init__(self, dId, brand, model, modelNo, source, destination, linkType, echo=True, baud=9600, synchronous=True):
         self.id = dId
         self.brand = brand
         self.model = model
@@ -31,8 +31,59 @@ class Device(object):
         self.destination = self._checkDestination(destination)
         self.baud = self._checkBaud(baud)
         self.source = self._checkSource(source, baud, synchronous)
+        self.commandTerminator = '\r'
+        self.pendingResponses = []
     
-    def send(self,command):
+    #Send
+    def sendCommand(self,command,**kwargs):
+        """
+        Send the [command] passed after checking that it is in [self.commands] (the command list) for the device
+        Return the raw response (in future automatically parse the response)
+        cmd,**kwargs -> _parseCommand() -> _send()
+        """
+        pass
+        if(command not in self.commands):
+            raise ValueError, 'The command you are trying to send (%s) was not found in the list of commands defined for this device (%s/%s)' % (command,self.brand,self.model)
+        else:
+            expectedArgs = self.commands[command].count('!')/2
+            if(expectedArgs != 0 and expectedArgs != len(kwargs)): raise ValueError, 'Expecting arguments but none were passed.'
+            parsedCommand = self._parseCommand(self.commands[command],**kwargs)
+            self._send(parsedCommand)
+            #add sent command to the sentCommand array
+            self.pendingResponses.append(self.commands[command])
+    
+    def _parseCommand(self, command, **kwargs):
+        """
+        Parse command by replacing all arguments in the command
+        """
+        pass
+        
+        #For each argument in function, replace the variable with the passed value
+        for argKey in kwargs:
+            #print "Replacing argument: ",argKey       #DEBUG
+            #Make the string to replace, strings are immutable in python use list of chars
+            #arg -> !arg!
+            listArg = list(argKey)
+            listArg.insert(0,"!")
+            listArg.insert(len(listArg),"!")
+            argString = "".join(listArg)
+            #print "Arg String: ",argString     #DEBUG
+            #print "kwarg", kwargs[argKey]   #DEBUG
+            #Strip the variable and replace with value passed to the device type layer function (eg: setRPM)
+            command = command.replace(argString,str(kwargs[argKey]))
+            #print command     #DEBUG
+            
+        #Check that no arguments have been left unreplaced (!arg!)
+        if (command.find('!') == -1):
+            #Append the command terminator at the end
+            listCommand = list(command)
+            listCommand.insert(len(listCommand),self.commandTerminator)
+            command = "".join(listCommand)
+            return command
+        else:
+            raise ValueError, 'Some arguments have not been replaced with their values. You likely forgot to pass the argument when calling device command or have not defined your device type layer function (eg: setRPM() in shaker.py) correctly.'
+    
+    def _send(self,command):
          """
          Send a [command] to the device. Optionally you can set the [source] through which the command will be sent
          Return the raw result of the command, this is processed downstream byt the specific device code
@@ -46,13 +97,134 @@ class Device(object):
          #and the field is changed to Reserved. In future, a full DigiMesh class should
          #probably be created to accommodate for further possible changes in the DM firmware
          self.source.tx(dest_addr_long=destination,dest_addr=b'\xFF\xFE',data=command)
+         print 'Sent!'
          
          if (self.synchronous==True):
             response = self.source.wait_read_frame()
             return response
          else:
             return None
+    
+    #Response Parsing
+    def parseResponse(self,response):
+        """
+        
+        """
+        pass
+        matchedCommands = 0
+        matchedFormat = None
+        #Search through sent commands
+        
+        for index,pendingResponse in enumerate(self.pendingResponses):
+            #Check whether one of the recently sent commands has a response format defined
+            #print 'Checking match for ', pendingResponse       DEBUG
+            matches = self._checkFormat(response['rf_data'],pendingResponse)
+            if matches: 
+                matchedCommands += 1
+                matchedFormat = pendingResponse
+        if(matchedCommands>1):
+            print 'WARNING: your response matches could be responses to more than one of the commands sent to the device recently.'
+        elif(matchedCommands==0):
+            #print 'Was not found in sent commands. Searching through all defined responses'        DEBUG
+            for deviceResponse in self.responses:
+                #print 'Checking ',deviceResponse       DEBUG
+                matches = self._checkFormat(response['rf_data'],self.responses[deviceResponse])
+                if matches: 
+                    matchedCommands += 1
+                    matchedFormat = self.responses[deviceResponse]
+                    print matchedFormat
+            if(matchedCommands>1):
+                print 'WARNING: your response matches could be responses to more than one of the commands sent to the device recently.'
+            elif(matchedCommands==0):
+                print 'WARNING: the response data received does not match any defined format. You are likely not incorporating enough responses in the [self.responses] dictionnary of your device definition. The response received in this case is: %s' % response['rf_data']
+                #raise ValueError, 'No command you have sent '
+        else:
+            #parse the variables 
+            parsedVariables = self._parseVariables(response['rf_data'],matchedFormat)
             
+            #print 'Matched:',matchedFormat     DEBUG
+        
+        #Additional check if the device is allowed to just spew data un
+        #Or if one command generates many more packet answers
+    
+    def _parseVariables(self,responseData,format):
+        """
+        Returns a dictionnary of the variableName:value
+        """
+        pass
+        variableNames = self._getVariables(format,False)
+        print variableNames
+        for variable in variableNames:
+            print 'variable: ', variable
+            format = format.replace(variable,'((?:[a-zA-Z0-9_]*))')
+            print 'format: ', format
+        variableValues = re.compile(format).findall(responseData)
+        
+        varVal = {}
+        for index,variableName in enumerate(variableNames):
+            varVal[variableName.replace('!','')] = variableValues[index]
+        return varVal
+        
+    def _checkFormat(self,packetData,responseFormat):
+        """
+        Check whether the [packetData] matches the expected [responseFormat]
+        Acceptable:
+            packetData = 'rf_data' field of response packet type 'rx'
+            responseFormat = [self.responses] string
+        """
+        pass
+        #build the custom regex from the responseFormat
+        variables = self._getVariables(responseFormat)
+        #replace the variables (!variableName!)
+        for variable in variables:
+            responseFormat = responseFormat.replace(variable,'((:?[a-zA-Z0-9_]*))')
+        #escape the special characters that can be found in commands
+        for specialChar in ['\t','\r']:
+            charList = list(specialChar)
+            responseFormat = responseFormat.replace(specialChar,'+\\%s' % charList[-1])
+            
+        #print 'Format is:', responseFormat
+        found = re.compile(responseFormat).search(packetData)
+        if(found!=None):
+            return True
+        else:
+            print False
+    
+    def _getVariables(self,deviceResponseString,stripped=False):
+        """
+        Returns the variables from a [self.response] string
+        """
+        pass
+        variableRegex='(!(?:[a-zA-Z0-9_]*)!)'
+        variables = re.compile(variableRegex).findall(deviceResponseString)
+        if stripped:
+            for index,variable in enumerate(variables):
+                variables[index] = variables[index].replace('!','')
+        return variables
+    
+    def _gotFrame(self,data):
+        """
+        Parse the received packed. This function is called asynchronously when the device.source (xbee or zigbee) receives a packet
+        Return the received packet
+        Acceptable:
+            XBee.response object
+        """
+        pass
+        try:
+            if data['id']=='tx_status':
+                if data['deliver_status']=='\x25': print 'Packet Error: Route Not Found'
+                
+            elif data['id']=='at_response':
+                print ''
+                #print "\t\t%s\t(%s)" % (data['parameter']['node_identifier'],data['parameter']['source_addr_long'].encode('hex'))
+            elif data['id']=='rx':
+                self.parseResponse(data)
+            else:
+                print data
+        except KeyError:
+            print 'Error: Uninplemented response packet type'
+    
+    #Checks
     def _checkBaud(self, baud):
         """
         Check that supplied [self.baud] rate is a valid baud
@@ -67,7 +239,7 @@ class Device(object):
             baud = 9600
             
         return baud
-
+    
     def _checkLink(self, linkType):
         """
         Check that the supplied [linkType] is valid.
@@ -87,7 +259,7 @@ class Device(object):
                 return loweredLink
         else:
             print linkError
-        
+    
     def _checkDestination(self, destination):
         """
         Check that the [destination] is a valid address. 
@@ -118,7 +290,7 @@ class Device(object):
                 print 'ERROR: Invalid destination MAC address supplied. Format expected: AA:BB:CC:DD:EE:FF:GG:HH'
             elif(self.linkType == 'http'):
                 print 'ERROR: Invalid destination IP address supplied. Format expected: AAA.AAA.AAA.AAA'
-                
+    
     def _checkSource(self, source, baud, synchronous):
         #could check to list the available com ports on the machine and check against that...
         """
@@ -168,11 +340,10 @@ class Device(object):
                 return source
             else:
                 print 'ERROR: Invalid URL passed. Make sure the http:// portion of the url is present. Do not input more than one url.'
-
         #Not one of the accepted types
         else:
             print 'ERROR: Invalid linkType string. Accepted values are: %s' % allSources
-
+    
     def _testSource(self, source):
         """
         Test that the device attached to the [source] COM port is responsive. If not, try to identify the error source.
@@ -199,7 +370,6 @@ class Device(object):
                     comments = 'The XBee on port %s seems to be in AT mode (transparent mode, where ATAP=0). \n \
                     You need to put the XBee in API mode (ATAP=1 or 2).' % source.serial.port
                     success = 0
-    
         #ZigBee
         elif (source.__class__ == ZigBee):
             try:
@@ -224,7 +394,6 @@ class Device(object):
                 comments = ""
         else:
             comments = 'Error: Unexpected source class - ', source.__class__
-    
         return success,comments
     
     def _testBee(self, source):
@@ -250,3 +419,4 @@ class Device(object):
         pass
         source.send('at',command='ap')
         return source.wait_read_frame()
+    

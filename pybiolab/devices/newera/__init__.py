@@ -1,8 +1,8 @@
 """
 pyBioLab devices brand package initialization file
-for brand: New Brunswick Scientific (http://www.nbsc.com/)
+for brand: New Era (http://www.syringepump.com/)
 By Charles Fracchia, 2012
 charlesfracchia@gmail.com
 """
 
-from innova import Innova
+from ne_syringe_pumps import NESyringePump
