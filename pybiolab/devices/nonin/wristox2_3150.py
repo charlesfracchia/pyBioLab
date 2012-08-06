@@ -7,7 +7,7 @@ Nonin WristOx2 3150 Medical Oximeter Device class
 """
 
 from pybiolab import Device 
-from pybiolab.medical import Oximeter
+from pybiolab import Oximeter
 
 class WristOx2(Device,Oximeter):
     """docstring for WristOx2"""

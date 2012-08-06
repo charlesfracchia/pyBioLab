@@ -34,8 +34,8 @@ class PHDUltra(Device,SyringePump):
             'getFreeSteps':'free',
             'getInfusionForce':'force',
             'setInfusionForce':'force !percent!',
-            'getPromptModeState':'poll';
-            'getPromptModeState':'poll !mode!';
+            'getPromptModeState':'poll',
+            'getPromptModeState':'poll !mode!',
             'getDateTime':'time',
             'getDateTime':'time !month!/!day!/!year! !hours!:!minutes!:!seconds!',
             'getValveState':'valve',
@@ -52,14 +52,14 @@ class PHDUltra(Device,SyringePump):
             'stop':'stop',
             #Rate commands
             'getCurrentRate':'crate',
-            'getDiameter','diameter',
-            'setDiameter','diameter !diameter!',
-            'getRampInfusionRate','iramp',
-            'setRampInfusionRate','iramp !startRate! !startRateUnits! !endRate! !endRateUnits! !rampTime!',     #rampTime in seconds
+            'getDiameter':'diameter',
+            'setDiameter':'diameter !diameter!',
+            'getRampInfusionRate':'iramp',
+            'setRampInfusionRate':'iramp !startRate! !startRateUnits! !endRate! !endRateUnits! !rampTime!',     #rampTime in seconds
             'getInfusionRate':'irate',
             'setInfusionRate':'irate !rate! !rateUnits!',
-            'getRampWithdrawRate','wramp',
-            'setRampWithdrawRate','wramp !startRate! !startRateUnits! !endRate! !endRateUnits! !rampTime!',     #rampTime in seconds
+            'getRampWithdrawRate':'wramp',
+            'setRampWithdrawRate':'wramp !startRate! !startRateUnits! !endRate! !endRateUnits! !rampTime!',     #rampTime in seconds
             'getWithdrawRate':'wrate',
             'setWithdrawRate':'wrate !rate! !rateUnits!',
             #Volume commands

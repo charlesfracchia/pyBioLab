@@ -1,7 +1,7 @@
 import time
 from pybiolab.devices.newbrunswick.innova import Innova
 #00:13:A2:00:40:8B:D6:45
-dodo = Innova(0,'00:13:A2:00:40:8B:D6:45','zigbee','/dev/tty.usbserial-A800HATZ',9600,False)
+dodo = Innova(0,'00:13:A2:00:40:8B:D6:45','zigbee','/dev/tty.usbserial-A800HARZ',9600,False)
 
 #print dodo.id
 #print dodo.brand
@@ -23,4 +23,6 @@ dodo = Innova(0,'00:13:A2:00:40:8B:D6:45','zigbee','/dev/tty.usbserial-A800HATZ'
 print "Setting RPM to 100"
 #dodo.sendCommand('getFirmwareVersion')
 dodo.sendCommand('setRPM',rpm=100)
+
+dodo.sendCommand('getDateTime')
 #dodo.getSettings()

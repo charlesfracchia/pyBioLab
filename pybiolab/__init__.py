@@ -7,14 +7,9 @@ charlesfracchia@gmail.com
 #Import main Device base class
 from pybiolab.device import Device
 
-#Import all the base classes for the device types
-from pybiolab.centrifuge import Centrifuge
-from pybiolab.electricity import Electricity
-from pybiolab.shaker import Shaker
-from pybiolab.temperature import Temperature
-from pybiolab.timer import Timer
-from pybiolab.volume import Volume
-from pybiolab.syringe import SyringePump
+#Import all the classes for the device types
+from pybiolab.classes import *
 
-#Import all the device configuration files
+#Import the Device Driver files
 from pybiolab.devices import *
+

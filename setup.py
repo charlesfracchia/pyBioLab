@@ -16,6 +16,8 @@ def autoPopulatePackages():
     
 packages=[
     'pybiolab',
+    'pybiolab.classes',
+    'pybiolab.classes.medical', #add dynamically in future by modifying autoPopulate()
     'pybiolab.devices',
 ]
 
