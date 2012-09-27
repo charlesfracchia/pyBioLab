@@ -243,11 +243,12 @@ class Device(object):
     def _checkLink(self, linkType):
         """
         Check that the supplied [linkType] is valid.
-        Return lowercase string of the connection type ('xbee', 'zigbee' or 'http')
+        Return lowercase string of the connection type ('xbee', 'zigbee', 'http' or 'serial')
         Acceptable (in any capitalised/lower case state):
             XBee
             ZigBee
             HTTP
+            Serial
         """
         pass
         linkError = 'ERROR: Invalid connection type / link supplied. You need to supply a string with one of the following values: %s. Supplied: %s' % (allSources, linkType)
